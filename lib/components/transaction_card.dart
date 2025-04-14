@@ -1,69 +1,87 @@
 import 'package:flutter/material.dart';
-import '../main.dart';
+import 'package:intl/intl.dart';
+
 import '../model.dart';
+import './transaction_edit.dart';
 
 class TransactionCard extends StatefulWidget {
   final Transaction transaction;
-  const TransactionCard({Key? key, required this.transaction}) : super(key: key);
+  final VoidCallback onTransactionUpdated; // Callback to update balance
+
+  const TransactionCard({Key? key, required this.transaction, required this.onTransactionUpdated}) : super(key: key);
 
   @override
   State<TransactionCard> createState() => _TransactionCardState();
 }
 
 class _TransactionCardState extends State<TransactionCard> {
+  final currencyFormatter = NumberFormat.currency(
+    locale: 'id_ID',
+    symbol: 'Rp',
+    decimalDigits: 2,
+  );
+
   @override
   Widget build(BuildContext context) {
     final categoryName = widget.transaction.category.target?.name ?? '-';
     final dateFormatted = _formatDate(widget.transaction.date);
     final amountColor = widget.transaction.type == "Income" ? Colors.green : Colors.red;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Container(
-          width: double.infinity,
-          height: 90,
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Bagian kiri
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    categoryName,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EditTransaction(transaction: widget.transaction, onTransactionUpdated: widget.onTransactionUpdated),
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Container(
+            width: double.infinity,
+            height: 90,
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      categoryName,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    dateFormatted,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.black54,
+                    const SizedBox(height: 4),
+                    Text(
+                      dateFormatted,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black54,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              // Bagian kanan
-              Text(
-                _formatAmount(widget.transaction.amount),
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: amountColor,
+                  ],
                 ),
-              ),
-            ],
+                Text(
+                  _formatAmount(widget.transaction.amount),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: amountColor,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -71,10 +89,10 @@ class _TransactionCardState extends State<TransactionCard> {
   }
 
   String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
   }
 
   String _formatAmount(double amount) {
-    return "${widget.transaction.type == "Expense" ? '-' : '+'}\$${amount.toStringAsFixed(2)}";
+    return widget.transaction.type == "Expense" ? "-${currencyFormatter.format(amount)}" : "+${currencyFormatter.format(amount)}";
   }
 }

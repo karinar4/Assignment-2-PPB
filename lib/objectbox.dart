@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import 'model.dart';
 import 'objectbox.g.dart';
 
@@ -24,16 +22,16 @@ class ObjectBox {
     Category category3 = Category('Gift', 'Income');
     Category category4 = Category('Transport', 'Expense');
 
-    Transaction transaction1 = Transaction('Income', 5000.0, DateTime(2025, 4, 1));
+    Transaction transaction1 = Transaction('Income', 10000000.0, DateTime(2025, 4, 9));
     transaction1.category.target = category1;
 
-    Transaction transaction2 = Transaction('Expense', 10.5, DateTime(2025, 4, 3));
+    Transaction transaction2 = Transaction('Expense', 50000.0, DateTime(2025, 4, 13));
     transaction2.category.target = category2;
 
-    Transaction transaction3 = Transaction('Income', 100.0, DateTime(2025, 4, 2));
+    Transaction transaction3 = Transaction('Income', 200000.0, DateTime(2025, 4, 10));
     transaction3.category.target = category3;
 
-    Transaction transaction4 = Transaction('Expense', 12.0, DateTime(2025, 4, 5));
+    Transaction transaction4 = Transaction('Expense', 100000.0, DateTime(2025, 4, 12));
     transaction4.category.target = category4;
 
     transactionBox.putMany([transaction1, transaction2]);
@@ -49,8 +47,6 @@ class ObjectBox {
     newTransaction.category.target = category;
 
     transactionBox.put(newTransaction);
-
-    debugPrint("Added Transaction: amount=${newTransaction.amount}, type=${newTransaction.type}, date=${newTransaction.date}, category=${newTransaction.category.target?.name}");
   }
 
   int addCategory(String type, String name){
