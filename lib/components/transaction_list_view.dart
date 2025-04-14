@@ -41,11 +41,10 @@ class _TransactionListState extends State<TransactionList> {
     }
   }
 
-  // Modify the itemBuilder to include onTransactionUpdated callback
   TransactionCard Function(BuildContext, int) _itemBuilder(List<Transaction> transactions) {
     return (BuildContext context, int index) => TransactionCard(
       transaction: transactions[index],
-      onTransactionUpdated: widget.onTransactionUpdated, // Pass the callback
+      onTransactionUpdated: widget.onTransactionUpdated,
     );
   }
 

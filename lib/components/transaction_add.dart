@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
 import '../main.dart';
 import '../model.dart';
 
@@ -19,78 +18,55 @@ class _AddTransactionState extends State<AddTransaction> {
   late Category currentCategory;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     _refreshCategoryList();
   }
 
   void _refreshCategoryList() {
-    categories = objectbox.categoryBox
-        .getAll()
-        .where((c) => c.type == _selectedType)
-        .toList();
-    if (categories.isNotEmpty) {
-      currentCategory = categories[0];
-    }
+    categories = objectbox.categoryBox.getAll().where((c) => c.type == _selectedType).toList();
+    if (categories.isNotEmpty) currentCategory = categories.first;
     setState(() {});
   }
 
-  void updateCategory(int newCategoryId){
-    Category newCurrentCategory = objectbox.categoryBox.get(newCategoryId)!;
-
-    setState(() {
-      currentCategory = newCurrentCategory;
-    });
-  }
-
-  void _createCategory(String name){
-    final newCategory = Category(name, _selectedType);
-    objectbox.categoryBox.put(newCategory);
+  void _createCategory(String name) {
+    objectbox.categoryBox.put(Category(name, _selectedType));
     _refreshCategoryList();
   }
 
-  void createTransaction(){
-    if (inputController.text.isNotEmpty){
-      double amount = double.tryParse(inputController.text) ?? 0.0;
-      if (amount <= 0) return;
+  void _createTransaction() {
+    final amount = double.tryParse(inputController.text) ?? 0;
+    if (amount <= 0) return;
 
-      final newTransaction = Transaction(_selectedType, amount, _selectedDate);
-      newTransaction.category.target = currentCategory;
-      objectbox.transactionBox.put(newTransaction);
+    final tx = Transaction(_selectedType, amount, _selectedDate)
+      ..category.target = currentCategory;
 
-      Navigator.pop(context);
-    }
+    objectbox.transactionBox.put(tx);
+    Navigator.pop(context);
   }
 
-  Future<void> _selectDate() async {
-    final DateTime? picked = await showDatePicker(
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
     );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
+    if (picked != null) setState(() => _selectedDate = picked);
   }
 
   void _showAddCategoryDialog() {
     final controller = TextEditingController();
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (_) => AlertDialog(
         title: const Text('New Category'),
         content: TextField(
           controller: controller,
           decoration: const InputDecoration(hintText: 'Enter category name'),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () {
               if (controller.text.isNotEmpty) {
@@ -107,7 +83,6 @@ class _AddTransactionState extends State<AddTransaction> {
 
   Widget _buildTypeSelector() {
     final types = ['Income', 'Expense'];
-
     return Row(
       children: types.map((type) {
         return Expanded(
@@ -132,11 +107,47 @@ class _AddTransactionState extends State<AddTransaction> {
     );
   }
 
+  Widget _buildAmountInput() => TextField(
+    controller: inputController,
+    keyboardType: TextInputType.number,
+    style: const TextStyle(fontSize: 18),
+    decoration: const InputDecoration(hintText: 'Amount'),
+  );
+
+  Widget _buildDateSelector() => Row(
+    children: [
+      const Text('Date: ', style: TextStyle(fontSize: 18)),
+      TextButton(
+        onPressed: _pickDate,
+        child: Text(
+          DateFormat('yyyy-MM-dd').format(_selectedDate),
+          style: const TextStyle(fontSize: 18),
+        ),
+      ),
+    ],
+  );
+
+  Widget _buildCategoryDropdown() => Row(
+    children: [
+      Expanded(
+        child: DropdownButton<Category>(
+          value: categories.isNotEmpty ? currentCategory : null,
+          isExpanded: true,
+          hint: const Text('Select category'),
+          items: categories.map((c) {
+            return DropdownMenuItem(value: c, child: Text(c.name));
+          }).toList(),
+          onChanged: (value) => setState(() => currentCategory = value!),
+        ),
+      ),
+      IconButton(onPressed: _showAddCategoryDialog, icon: const Icon(Icons.add)),
+    ],
+  );
+
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Add Transaction')),
-      key: UniqueKey(),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -144,67 +155,22 @@ class _AddTransactionState extends State<AddTransaction> {
           children: [
             _buildTypeSelector(),
             const SizedBox(height: 16),
-            TextField(
-              controller: inputController,
-              keyboardType: TextInputType.number,
-              style: const TextStyle(fontSize: 18),
-              decoration: const InputDecoration(
-                hintText: 'Amount',
-              ),
-            ),
+            _buildAmountInput(),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                const Text('Date: ', style: TextStyle(fontSize: 18)),
-                TextButton(
-                  onPressed: _selectDate,
-                  child: Text(
-                    DateFormat('yyyy-MM-dd').format(_selectedDate),
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                ),
-              ],
-            ),
+            _buildDateSelector(),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButton<Category>(
-                    value: categories.isNotEmpty ? currentCategory : null,
-                    isExpanded: true,
-                    hint: const Text('Select category'),
-                    items: categories.map((Category category) {
-                      return DropdownMenuItem<Category>(
-                        value: category,
-                        child: Text(category.name, style: const TextStyle(fontSize: 18)),
-                      );
-                    }).toList(),
-                    onChanged: (Category? newValue) {
-                      if (newValue != null) {
-                        setState(() {
-                          currentCategory = newValue;
-                        });
-                      }
-                    },
-                  ),
-                ),
-                IconButton(
-                  onPressed: _showAddCategoryDialog,
-                  icon: const Icon(Icons.add),
-                ),
-              ],
-            ),
+            _buildCategoryDropdown(),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: createTransaction,
+                onPressed: _createTransaction,
                 child: const Text('Add', style: TextStyle(fontSize: 18)),
               ),
             ),
           ],
-        )
-      )
+        ),
+      ),
     );
   }
 }
