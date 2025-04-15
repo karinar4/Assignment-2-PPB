@@ -30,7 +30,7 @@ class _AddTransactionState extends State<AddTransaction> {
   }
 
   void _createCategory(String name) {
-    objectbox.categoryBox.put(Category(name, _selectedType));
+    objectbox.addCategory(_selectedType, name);
     _refreshCategoryList();
   }
 
@@ -38,10 +38,7 @@ class _AddTransactionState extends State<AddTransaction> {
     final amount = double.tryParse(inputController.text) ?? 0;
     if (amount <= 0) return;
 
-    final tx = Transaction(_selectedType, amount, _selectedDate)
-      ..category.target = currentCategory;
-
-    objectbox.transactionBox.put(tx);
+    objectbox.addTransaction(_selectedType, amount, _selectedDate, currentCategory);
     Navigator.pop(context);
   }
 

@@ -34,7 +34,7 @@ class ObjectBox {
     Transaction transaction4 = Transaction('Expense', 100000.0, DateTime(2025, 4, 12));
     transaction4.category.target = category4;
 
-    transactionBox.putMany([transaction1, transaction2]);
+    transactionBox.putMany([transaction1, transaction2, transaction3, transaction4]);
   }
 
   static Future<ObjectBox> create() async {
@@ -48,6 +48,22 @@ class ObjectBox {
 
     transactionBox.put(newTransaction);
   }
+
+  void updateTransaction(int id, String type, double amount, DateTime date, Category category) {
+    final transaction = transactionBox.get(id);
+    if (transaction != null) {
+      transaction.type = type;
+      transaction.amount = amount;
+      transaction.date = date;
+      transaction.category.target = category;
+      transactionBox.put(transaction);
+    }
+  }
+
+  void deleteTransaction(int id) {
+    transactionBox.remove(id);
+  }
+
 
   int addCategory(String type, String name){
     Category categoryToAdd = Category(name, type);

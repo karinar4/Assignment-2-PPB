@@ -116,47 +116,51 @@ The following section explains how the ObjectBox helper class enables CRUD opera
 ### Create
 Add single transaction
 ```
-final newCategory = Category('Bonus', 'Income');
-objectBox.categoryBox.put(newCategory);
+Category category1 = Category('Salary', 'Income');
 
-final newTransaction = Transaction('Income', 150000.0, DateTime.now());
-newTransaction.category.target = newCategory;
+Transaction transaction1 = Transaction('Income', 10000000.0, DateTime(2025, 4, 9));
+transaction1.category.target = category1;
 
-objectBox.transactionBox.put(newTransaction);
+transactionBox.put(transaction1);
 ```
 Add multiple transaction
 ```
-objectBox.transactionBox.putMany([transaction1, transaction2]);
+transactionBox.putMany([transaction1, transaction2, transaction3, transaction4]);
 ```
 
 ### Read
 Get all
 ```
-List<Transaction> allTransactions = objectBox.transactionBox.getAll();
+List<Category> categories = objectbox.categoryBox.getAll();
 ```
 Filter
 ```
-final expenses = objectBox.transactionBox
-  .query(Transaction_.type.equals('Expense'))
-  .build()
-  .find();
+transactionBox.query(Transaction_.type.equals('Expense'))..order(Transaction_.date, flags: Order.descending)
+final expenses = transactionBox
+    .query(Transaction_.type.equals('Expense'))
+    .order(Transaction_.date, flags: Order.descending)
+    .watch(triggerImmediately: true)
+    .map((q) => q.find());
 ```
 
 ### Update
 ```
-Transaction? tx = objectBox.transactionBox.get(1);
-if (tx != null) {
-  tx.amount = 75000.0;
-  objectBox.transactionBox.put(tx);
+final transaction = transactionBox.get(id);
+if (transaction != null) {
+    transaction.type = type;
+    transaction.amount = amount;
+    transaction.date = date;
+    transaction.category.target = category;
+    transactionBox.put(transaction);
 }
 ```
 
 ### Delete
 Delete by ID
 ```
-objectBox.categoryBox.remove(category.id);
+transactionBox.remove(id);
 ```
 Delete all
 ```
-objectBox.transactionBox.removeAll();
+transactionBox.removeAll();
 ```

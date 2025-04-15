@@ -44,18 +44,13 @@ class _EditTransactionState extends State<EditTransaction> {
     final amount = double.tryParse(inputController.text) ?? 0;
     if (amount <= 0) return;
 
-    widget.transaction.amount = amount;
-    widget.transaction.type = _selectedType;
-    widget.transaction.date = _selectedDate;
-    widget.transaction.category.target = currentCategory;
-
-    objectbox.transactionBox.put(widget.transaction);
+    objectbox.updateTransaction(widget.transaction.id, _selectedType, amount, _selectedDate, currentCategory);
     widget.onTransactionUpdated();
     Navigator.pop(context);
   }
 
   void _deleteTransaction() {
-    objectbox.transactionBox.remove(widget.transaction.id);
+    objectbox.deleteTransaction(widget.transaction.id);
     widget.onTransactionUpdated();
     Navigator.pop(context);
   }
