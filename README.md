@@ -108,3 +108,55 @@ class ObjectBox {
     return ObjectBox._create(store);
   }
 ```
+This class handles the setup and management of the ObjectBox database. It includes the configuration of Box instances for your data models and inserts sample data when the database is initialized for the first time.
+
+## CRUD
+The following section explains how the ObjectBox helper class enables CRUD operations.
+
+### Create
+Add single transaction
+```
+final newCategory = Category('Bonus', 'Income');
+objectBox.categoryBox.put(newCategory);
+
+final newTransaction = Transaction('Income', 150000.0, DateTime.now());
+newTransaction.category.target = newCategory;
+
+objectBox.transactionBox.put(newTransaction);
+```
+Add multiple transaction
+```
+objectBox.transactionBox.putMany([transaction1, transaction2]);
+```
+
+### Read
+Get all
+```
+List<Transaction> allTransactions = objectBox.transactionBox.getAll();
+```
+Filter
+```
+final expenses = objectBox.transactionBox
+  .query(Transaction_.type.equals('Expense'))
+  .build()
+  .find();
+```
+
+### Update
+```
+Transaction? tx = objectBox.transactionBox.get(1);
+if (tx != null) {
+  tx.amount = 75000.0;
+  objectBox.transactionBox.put(tx);
+}
+```
+
+### Delete
+Delete by ID
+```
+objectBox.categoryBox.remove(category.id);
+```
+Delete all
+```
+objectBox.transactionBox.removeAll();
+```
