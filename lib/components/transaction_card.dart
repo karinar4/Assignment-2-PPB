@@ -6,7 +6,7 @@ import './transaction_edit.dart';
 
 class TransactionCard extends StatefulWidget {
   final Transaction transaction;
-  final VoidCallback onTransactionUpdated; // Callback to update balance
+  final VoidCallback onTransactionUpdated;
 
   const TransactionCard({Key? key, required this.transaction, required this.onTransactionUpdated}) : super(key: key);
 

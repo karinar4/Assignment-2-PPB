@@ -1,16 +1,63 @@
-# object_box
 
-A new Flutter project.
+# Flutter Finance Tracker App
 
-## Getting Started
+This app uses ObjectBox as a local database solution for storing financial transactions and categories efficiently.
 
-This project is a starting point for a Flutter application.
+## Setting Up
 
-A few resources to get you started if this is your first Flutter project:
+### 1. Add Dependencies
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Add to `pubspec.yaml`:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```
+dependencies:
+
+  objectbox: ^4.1.0
+  objectbox_flutter_libs: any
+
+dev_dependencies:
+  build_runner: ^2.4.15
+  objectbox_generator: any
+```
+
+After adding these dependencies, run:
+
+```bash
+flutter pub get
+```
+
+### 2. ObjectBox Files
+
+run this command to generate the ObjectBox files:
+```bash
+dart run build_runner build
+```
+
+## Model Definitions
+Define models using @Entity():
+```
+@Entity()
+class Transaction {
+  @Id()
+  int id;
+
+  String type;
+  double amount;
+  DateTime date;
+
+  final category = ToOne<Category>();
+
+  Transaction(this.type, this.amount, this.date, {this.id = 0});
+}
+
+@Entity()
+class Category {
+  @Id()
+  int id;
+
+  String name;
+  String type;
+
+  Category(this.name, this.type, {this.id = 0});
+}
+```
